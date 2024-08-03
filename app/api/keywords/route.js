@@ -1,19 +1,23 @@
-// app/api/keywords/route.js
 import fetch from 'node-fetch';
 
 export async function POST(request) {
   try {
-    const { keywords } = await request.json();
+    // Check for application/json content type
+    if (request.headers.get('Content-Type') !== 'application/json') {
+      return new Response(JSON.stringify({ error: 'Invalid content type' }), { status: 415 });
+    }
+
+    const { keywords, subreddit } = await request.json();
     
     if (!Array.isArray(keywords) || keywords.length === 0) {
       return new Response(JSON.stringify({ error: 'Invalid or missing keywords' }), { status: 400 });
     }
 
-    // Assuming you want to search in a specific subreddit
-    const subreddit = 'learnprogramming'; // Replace with dynamic value if needed
+    // Validate subreddit or use a default one
+    const subredditName = subreddit || 'learnprogramming'; // Default subreddit if not provided
     const query = keywords.join(' '); // Combine keywords into a single query
 
-    const url = new URL(`https://www.reddit.com/r/${subreddit}/search.json`);
+    const url = new URL(`https://www.reddit.com/r/${subredditName}/search.json`);
     const params = {
       q: query,
       sort: 'new', // or 'relevance', 'hot', 'top', 'comments'
@@ -33,7 +37,7 @@ export async function POST(request) {
     // Process the data if needed and return a structured response
     return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
-    console.error('Error fetching Reddit posts:', error);
+    console.error('Error fetching Reddit posts:', error.message);
     return new Response(JSON.stringify({ error: 'Error fetching Reddit posts' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
