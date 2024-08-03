@@ -1,5 +1,59 @@
 import fetch from 'node-fetch';
 
+async function getAccessToken() {
+  const clientId = process.env.REDDIT_CLIENT_ID;
+  const clientSecret = process.env.REDDIT_CLIENT_SECRET;
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+  const response = await fetch('https://www.reddit.com/api/v1/access_token', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: 'grant_type=client_credentials'
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Failed to get access token: ${response.status} - ${errorBody}`);
+  }
+
+  const data = await response.json();
+  return data.access_token;
+}
+
+async function fetchRedditPosts(keywords) {
+  const accessToken = await getAccessToken();
+  const subreddit = 'learnprogramming';
+  const query = keywords.join(' ');
+
+  const url = new URL(`https://oauth.reddit.com/r/${subreddit}/search.json`);
+  const params = {
+    q: query,
+    sort: 'new',
+    limit: 50
+  };
+
+  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'User-Agent': 'YourAppName/1.0.0 (https://yourapp.com)',
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Failed to fetch Reddit posts: ${response.status} - ${errorBody}`);
+  }
+
+  const data = await response.json();
+  return data;
+}
+
 export async function POST(request) {
   try {
     const { keywords } = await request.json();
@@ -8,36 +62,10 @@ export async function POST(request) {
       return new Response(JSON.stringify({ error: 'Invalid or missing keywords' }), { status: 400 });
     }
 
-    const subreddit = 'learnprogramming'; // Replace with dynamic value if needed
-    const query = keywords.join(' '); // Combine keywords into a single query
-
-    const url = new URL(`https://www.reddit.com/r/${subreddit}/search.json`);
-    const params = {
-      q: query,
-      sort: 'new', // or 'relevance', 'hot', 'top', 'comments'
-      limit: 50
-    };
-
-    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Listen Social/1.0.0',
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error(`Reddit API responded with status ${response.status}: ${errorBody}`);
-      throw new Error(`Reddit API responded with status ${response.status}`);
-    }
-
-    const data = await response.json();
-
+    const data = await fetchRedditPosts(keywords);
     return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Error fetching Reddit posts:', error);
-    return new Response(JSON.stringify({ error: 'Error fetching Reddit posts' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Error fetching Reddit posts', details: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
