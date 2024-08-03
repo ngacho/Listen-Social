@@ -17,7 +17,7 @@ export async function POST(request) {
     const params = {
       q: query,
       sort: 'new', // or 'relevance', 'hot', 'top', 'comments'
-      limit: 10
+      limit: 50
     };
 
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
