@@ -2,7 +2,6 @@ import fetch from 'node-fetch';
 
 export async function POST(request) {
   try {
-    // Check for application/json content type
     if (request.headers.get('Content-Type') !== 'application/json') {
       return new Response(JSON.stringify({ error: 'Invalid content type' }), { status: 415 });
     }
@@ -13,28 +12,32 @@ export async function POST(request) {
       return new Response(JSON.stringify({ error: 'Invalid or missing keywords' }), { status: 400 });
     }
 
-    // Validate subreddit or use a default one
-    const subredditName = subreddit || 'learnprogramming'; // Default subreddit if not provided
-    const query = keywords.join(' '); // Combine keywords into a single query
+    const subredditName = subreddit || 'learnprogramming'; 
+    const query = keywords.join(' ');
 
     const url = new URL(`https://www.reddit.com/r/${subredditName}/search.json`);
     const params = {
       q: query,
-      sort: 'new', // or 'relevance', 'hot', 'top', 'comments'
+      sort: 'new',
       limit: 50
     };
 
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Listen Social'
+      }
+    });
 
     if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`Reddit API responded with status ${response.status}: ${errorBody}`);
       throw new Error(`Reddit API responded with status ${response.status}`);
     }
 
     const data = await response.json();
 
-    // Process the data if needed and return a structured response
     return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Error fetching Reddit posts:', error.message);
