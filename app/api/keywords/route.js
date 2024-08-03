@@ -2,23 +2,19 @@ import fetch from 'node-fetch';
 
 export async function POST(request) {
   try {
-    if (request.headers.get('Content-Type') !== 'application/json') {
-      return new Response(JSON.stringify({ error: 'Invalid content type' }), { status: 415 });
-    }
+    const { keywords } = await request.json();
 
-    const { keywords, subreddit } = await request.json();
-    
     if (!Array.isArray(keywords) || keywords.length === 0) {
       return new Response(JSON.stringify({ error: 'Invalid or missing keywords' }), { status: 400 });
     }
 
-    const subredditName = subreddit || 'learnprogramming'; 
-    const query = keywords.join(' ');
+    const subreddit = 'learnprogramming'; // Replace with dynamic value if needed
+    const query = keywords.join(' '); // Combine keywords into a single query
 
-    const url = new URL(`https://www.reddit.com/r/${subredditName}/search.json`);
+    const url = new URL(`https://www.reddit.com/r/${subreddit}/search.json`);
     const params = {
       q: query,
-      sort: 'new',
+      sort: 'new', // or 'relevance', 'hot', 'top', 'comments'
       limit: 50
     };
 
@@ -26,7 +22,8 @@ export async function POST(request) {
 
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Listen Social'
+        'User-Agent': 'Listen Social/1.0.0',
+        'Content-Type': 'application/json'
       }
     });
 
@@ -40,7 +37,7 @@ export async function POST(request) {
 
     return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
-    console.error('Error fetching Reddit posts:', error.message);
+    console.error('Error fetching Reddit posts:', error);
     return new Response(JSON.stringify({ error: 'Error fetching Reddit posts' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
