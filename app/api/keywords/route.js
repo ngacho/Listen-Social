@@ -40,7 +40,7 @@ async function fetchRedditPosts(keywords) {
   const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
-      'User-Agent': 'YourAppName/1.0.0 (https://yourapp.com)',
+      'User-Agent': 'Listen Social/1.0.0 (https://listen-social.vercel.app/)',
       'Content-Type': 'application/json'
     }
   });
