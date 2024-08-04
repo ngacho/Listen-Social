@@ -1,8 +1,14 @@
 import fetch from 'node-fetch';
 
+// Function to get Reddit access token
 async function getAccessToken() {
   const clientId = process.env.REDDIT_CLIENT_ID;
   const clientSecret = process.env.REDDIT_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error('Client ID or Secret is missing');
+  }
+
   const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
   const response = await fetch('https://www.reddit.com/api/v1/access_token', {
@@ -16,16 +22,17 @@ async function getAccessToken() {
 
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error('Access Token Error Response:', errorBody); // Log the response text
+    console.error('Access Token Error Response:', errorBody);
     throw new Error(`Failed to get access token: ${response.status} - ${errorBody}`);
   }
 
   const data = await response.json();
-  return data.access_token;
+  return data.access_token; // Return the access token
 }
 
+// Function to fetch Reddit posts based on keywords
 async function fetchRedditPosts(keywords) {
-  const accessToken = await getAccessToken();
+  const accessToken = await getAccessToken(); // Get the access token
   const subreddit = 'learnprogramming';
   const query = keywords.join(' ');
 
@@ -40,22 +47,22 @@ async function fetchRedditPosts(keywords) {
 
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'User-Agent': 'listen-social/0.1.0',
-      'Content-Type': 'application/json'
+      'Authorization': `Bearer ${accessToken}`, // Use the access token
+      'User-Agent': 'listen-social/0.1.0'
     }
   });
 
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error('Reddit Posts Error Response:', errorBody); // Log the response text
+    console.error('Reddit Posts Error Response:', errorBody);
     throw new Error(`Failed to fetch Reddit posts: ${response.status} - ${errorBody}`);
   }
 
   const data = await response.json();
-  return data;
+  return data; // Return the Reddit posts data
 }
 
+// Function to handle POST request
 export async function POST(request) {
   try {
     const { keywords } = await request.json();
