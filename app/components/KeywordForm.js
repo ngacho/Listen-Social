@@ -3,7 +3,7 @@ import { useState } from 'react';
 function KeywordForm() {
   const [inputKeywords, setInputKeywords] = useState('');
   const [results, setResults] = useState([]);
-  const [selectedText, setSelectedText] = useState(null); // State for the full text
+  const [selectedText, setSelectedText] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -12,7 +12,7 @@ function KeywordForm() {
 
   const fetchResults = async () => {
     try {
-      const response = await fetch('/api/keywords', {
+      const response = await fetch(`${process.env.NODE_ENV === 'production' ? '/Listen-Social' : ''}/api/keywords`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ keywords: inputKeywords.split(',').map(keyword => keyword.trim()) })
@@ -25,7 +25,6 @@ function KeywordForm() {
       const data = await response.json();
       console.log('API Response:', data);
 
-      // Process Reddit data to fit your table format
       const processedResults = data.data.children.map(child => ({
         keyword: inputKeywords.split(',').map(keyword => keyword.trim()).join(', '),
         title: child.data.title,
@@ -43,29 +42,26 @@ function KeywordForm() {
   };
 
   const handleTextClick = (data) => {
-    setSelectedText(data); // Set the entire data object for the modal
+    setSelectedText(data);
   };
 
   const closeModal = () => {
-    setSelectedText(null); // Close the modal
+    setSelectedText(null);
   };
 
-  console.log('Results:', results); // Debugging statement
+  console.log('Results:', results);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 transition-colors duration-300 ease-in">
-      {/* Menu Bar */}
       <nav className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-white text-2xl font-bold">Listen Social</h1>
         </div>
       </nav>
-    
+
       <div className="flex flex-1 transition-all duration-300 ease-in">
-        {/* Form Section */}
         <div className="w-full lg:w-1/3 p-6 flex justify-center items-center">
           <div className="bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-700 w-full max-w-md">
-            
             <h1 className="text-3xl font-bold mb-6 text-gray-200 text-center">Keyword Search</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
@@ -85,13 +81,12 @@ function KeywordForm() {
             </form>
           </div>
         </div>
-  
-        {/* Results Section */}
+
         <div className="w-full lg:w-2/3 p-6 flex flex-col">
           <div className="bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-700 flex-1">
             <h2 className="text-2xl font-bold mb-6 text-gray-200">Search Results</h2>
             <div className="overflow-x-auto">
-              <div className="overflow-y-auto max-h-[calc(100vh-14rem)]"> {/* Adjust max-height as needed */}
+              <div className="overflow-y-auto max-h-[calc(100vh-14rem)]">
                 <table className="min-w-full divide-y divide-gray-700">
                   <thead className="bg-gray-700">
                     <tr>
@@ -165,7 +160,6 @@ function KeywordForm() {
         </div>
       </div>
 
-      {/* Modal for displaying full data */}
       {selectedText && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-8 rounded-lg w-full max-w-4xl relative">
@@ -204,32 +198,22 @@ function KeywordForm() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row sm:space-x-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-300">Link:</h3>
-                  <a
-                    href={selectedText.url}
-                    className="text-blue-400 hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedText.url || "N/A"}
-                  </a>
-                </div>
-              </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-300">Full Text:</h3>
-                <p className="text-gray-200">
+                <h3 className="text-lg font-semibold text-gray-300">Text:</h3>
+                <p className="text-gray-200 whitespace-pre-wrap">
                   {selectedText.selftext || "N/A"}
                 </p>
               </div>
-              <div className="flex justify-end space-x-4 mt-4">
-                <button
-                  onClick={closeModal}
-                  className="bg-gray-700 text-white p-4 rounded-lg hover:bg-gray-600 transition-colors duration-300 ease-in"
+              <div>
+                <h3 className="text-lg font-semibold text-gray-300">URL:</h3>
+                <a
+                  href={selectedText.url}
+                  className="text-blue-400 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  Close
-                </button>
+                  View Post
+                </a>
               </div>
             </div>
           </div>
