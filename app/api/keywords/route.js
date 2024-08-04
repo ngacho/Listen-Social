@@ -16,6 +16,7 @@ async function getAccessToken() {
 
   if (!response.ok) {
     const errorBody = await response.text();
+    console.error('Access Token Error Response:', errorBody); // Log the response text
     throw new Error(`Failed to get access token: ${response.status} - ${errorBody}`);
   }
 
@@ -40,13 +41,14 @@ async function fetchRedditPosts(keywords) {
   const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
-      'User-Agent': 'Listen Social/1.0.0 (https://listen-social.vercel.app/)',
+      'User-Agent': 'listen-social/0.1.0',
       'Content-Type': 'application/json'
     }
   });
 
   if (!response.ok) {
     const errorBody = await response.text();
+    console.error('Reddit Posts Error Response:', errorBody); // Log the response text
     throw new Error(`Failed to fetch Reddit posts: ${response.status} - ${errorBody}`);
   }
 

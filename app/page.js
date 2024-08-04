@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import DOMPurify from 'dompurify';
 import KeywordForm from './components/KeywordForm'; // Adjust the path if necessary
+import './globals.css';
 
 export default function RedditKeywordPage() {
   const [posts, setPosts] = useState([]);
