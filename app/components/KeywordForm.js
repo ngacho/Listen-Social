@@ -12,7 +12,7 @@ function KeywordForm() {
 
   const fetchResults = async () => {
     try {
-      const response = await fetch(`${process.env.NODE_ENV === 'production' ? '/Listen-Social' : ''}/api/keywords`, {
+      const response = await fetch('/api/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ keywords: inputKeywords.split(',').map(keyword => keyword.trim()) })
