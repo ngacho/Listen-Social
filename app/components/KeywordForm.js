@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import usePolling from './usePolling'; // Adjust the path as necessary
+import { RefreshIcon } from '@heroicons/react/solid';
 
 function KeywordForm() {
   const [inputKeywords, setInputKeywords] = useState('');
   const [results, setResults] = useState([]);
   const [selectedText, setSelectedText] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    await fetchResults();
-  };
+  const fetchResults = useCallback(async () => {
+    if (!inputKeywords) return;
 
-  const fetchResults = async () => {
     try {
       const response = await fetch('/api/keywords', {
         method: 'POST',
@@ -39,6 +39,19 @@ function KeywordForm() {
       console.error('Error fetching results:', error);
       setResults([]);
     }
+  }, [inputKeywords]);
+
+  usePolling(fetchResults, 86400000); // Poll every 1 hour
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    fetchResults();
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchResults();
+    setIsRefreshing(false);
   };
 
   const handleTextClick = (data) => {
@@ -79,6 +92,23 @@ function KeywordForm() {
                 Search
               </button>
             </form>
+            <button
+        className="mt-4 bg-blue-700 text-white p-4 rounded-lg w-full hover:bg-blue-800 transition-colors duration-300 ease-in flex items-center justify-center"
+        onClick={handleRefresh}
+        disabled={isRefreshing}
+      >
+        {isRefreshing ? (
+          <>
+            <RefreshIcon className="h-5 w-5 text-white animate-spin" /> {/* Rotating icon */}
+            <span className="ml-2">Refreshing...</span>
+          </>
+        ) : (
+          <>
+            <RefreshIcon className="h-5 w-5 text-white" /> {/* Static icon */}
+            <span className="ml-2">Refresh</span>
+          </>
+        )}
+      </button>
           </div>
         </div>
 
