@@ -12,6 +12,7 @@
   },
   "homepage": "https://suprsend-notificationapi.github.io/Listen-Social/",
   "dependencies": {
+    "@clerk/nextjs": "^5.2.14",
     "@heroicons/react": "^1.0.6",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.3",

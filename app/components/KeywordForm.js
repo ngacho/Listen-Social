@@ -1,21 +1,45 @@
 import { useState, useCallback } from 'react';
 import usePolling from './usePolling'; // Adjust the path as necessary
-import { RefreshIcon } from '@heroicons/react/solid';
+import { RefreshIcon, SearchIcon } from '@heroicons/react/solid'; // Import icons
+import { XCircleIcon } from '@heroicons/react/solid'; // Import close icon
+import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
 
 function KeywordForm() {
   const [inputKeywords, setInputKeywords] = useState('');
   const [results, setResults] = useState([]);
   const [selectedText, setSelectedText] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [sortBy, setSortBy] = useState('relevance');
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [resultLimit, setResultLimit] = useState(10);
+  const [restrictSr, setRestrictSr] = useState(false);
+  const [subreddit, setSubreddit] = useState(''); // Changed from category
+  const [includeFacets, setIncludeFacets] = useState(false);
+  const [type, setType] = useState([]);
+  const { user, isSignedIn } = useUser();
 
   const fetchResults = useCallback(async () => {
     if (!inputKeywords) return;
 
+    setIsSearching(true);
+
     try {
       const response = await fetch('/api/keywords', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keywords: inputKeywords.split(',').map(keyword => keyword.trim()) })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          keywords: inputKeywords.split(',').map(keyword => keyword.trim()),
+          sortBy,
+          timeFilter,
+          resultLimit,
+          restrictSr,
+          subreddit, // Use subreddit for filtering
+          includeFacets,
+          type
+        })
       });
 
       if (!response.ok) {
@@ -38,10 +62,12 @@ function KeywordForm() {
     } catch (error) {
       console.error('Error fetching results:', error);
       setResults([]);
+    } finally {
+      setIsSearching(false);
     }
-  }, [inputKeywords]);
+  }, [inputKeywords, sortBy, timeFilter, resultLimit, restrictSr, subreddit, includeFacets, type]);
 
-  usePolling(fetchResults, 86400000); // Poll every 1 hour
+  usePolling(fetchResults, 86400000); // Poll every 24 hours
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -62,13 +88,29 @@ function KeywordForm() {
     setSelectedText(null);
   };
 
-  console.log('Results:', results);
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 transition-colors duration-300 ease-in">
       <nav className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-white text-2xl font-bold">Listen Social</h1>
+          <div>
+            {isSignedIn ? (
+              <UserButton />
+            ) : (
+              <>
+                <SignInButton>
+                  <button className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors duration-300 ease-in">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton>
+                  <button className="ml-4 bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors duration-300 ease-in">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -85,30 +127,90 @@ function KeywordForm() {
                 required
                 className="border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in"
               />
-              <button
-                type="submit"
-                className="bg-blue-700 text-white p-4 rounded-lg w-full hover:bg-blue-800 transition-colors duration-300 ease-in"
-              >
-                Search
-              </button>
+              <div className="flex space-x-4">
+                <div className="relative flex-1">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    disabled={!isSignedIn}
+                    className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
+                  >
+                    <option value="relevance">Relevance</option>
+                    <option value="hot">Hot</option>
+                    <option value="top">Top</option>
+                    <option value="new">New</option>
+                    <option value="comments">Comments</option>
+                  </select>
+                  {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
+                </div>
+                <div className="relative flex-1">
+                  <select
+                    value={timeFilter}
+                    onChange={(e) => setTimeFilter(e.target.value)}
+                    disabled={!isSignedIn}
+                    className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
+                  >
+                    <option value="hour">Past Hour</option>
+                    <option value="day">Past Day</option>
+                    <option value="week">Past Week</option>
+                    <option value="month">Past Month</option>
+                    <option value="year">Past Year</option>
+                    <option value="all">All Time</option>
+                  </select>
+                  {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
+                </div>
+                <div className="relative flex-1">
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={resultLimit}
+                    onChange={(e) => setResultLimit(e.target.value)}
+                    disabled={!isSignedIn}
+                    className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
+                  />
+                  {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
+                </div>
+              </div>
+              <label className="flex items-center relative">
+                <input
+                  type="text"
+                  placeholder="Restrict to this subreddit"
+                  value={subreddit}
+                  onChange={(e) => setSubreddit(e.target.value)}
+                  disabled={!isSignedIn}
+                  className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
+                />
+                {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={restrictSr}
+                  onChange={(e) => setRestrictSr(e.target.checked)}
+                  disabled={!isSignedIn}
+                  className={`mr-2 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}
+                />
+                <span className={`text-gray-200 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}>Restrict to Subreddit</span>
+              </label>
+              <div className="flex space-x-4">
+                <button
+                  type="submit"
+                  disabled={isSearching}
+                  className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 ease-in ${isSearching ? 'bg-blue-500 cursor-not-allowed' : ''}`}
+                >
+                  {isSearching ? <span className="flex items-center justify-center">Searching... <SearchIcon className="w-5 h-5 ml-2" /></span> : <span className="flex items-center justify-center">Search <SearchIcon className="w-5 h-5 ml-2" /></span>}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className={`bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300 ease-in ${isRefreshing ? 'bg-gray-500 cursor-not-allowed' : ''}`}
+                >
+                  {isRefreshing ? <span className="flex items-center justify-center">Refreshing... <RefreshIcon className="w-5 h-5 ml-2" /></span> : <span className="flex items-center justify-center">Refresh <RefreshIcon className="w-5 h-5 ml-2" /></span>}
+                </button>
+              </div>
             </form>
-            <button
-        className="mt-4 bg-blue-700 text-white p-4 rounded-lg w-full hover:bg-blue-800 transition-colors duration-300 ease-in flex items-center justify-center"
-        onClick={handleRefresh}
-        disabled={isRefreshing}
-      >
-        {isRefreshing ? (
-          <>
-            <RefreshIcon className="h-5 w-5 text-white animate-spin" /> {/* Rotating icon */}
-            <span className="ml-2">Refreshing...</span>
-          </>
-        ) : (
-          <>
-            <RefreshIcon className="h-5 w-5 text-white" /> {/* Static icon */}
-            <span className="ml-2">Refresh</span>
-          </>
-        )}
-      </button>
           </div>
         </div>
 
@@ -116,7 +218,7 @@ function KeywordForm() {
           <div className="bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-700 flex-1">
             <h2 className="text-2xl font-bold mb-6 text-gray-200">Search Results</h2>
             <div className="overflow-x-auto">
-              <div className="overflow-y-auto max-h-[calc(100vh-14rem)]">
+              <div className="overflow-y-auto max-h-[calc(100vh-12rem)]"> {/* Adjusted max height */}
                 <table className="min-w-full divide-y divide-gray-700">
                   <thead className="bg-gray-700">
                     <tr>
@@ -189,7 +291,7 @@ function KeywordForm() {
           </div>
         </div>
       </div>
-
+  
       {selectedText && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-8 rounded-lg w-full max-w-4xl relative">
@@ -197,20 +299,7 @@ function KeywordForm() {
               onClick={closeModal}
               className="absolute top-4 right-4 text-gray-400 hover:text-white"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <XCircleIcon className="h-6 w-6" />
             </button>
             <h2 className="text-2xl font-bold mb-4 text-gray-200">Post Details</h2>
             <div className="space-y-4">
@@ -249,6 +338,21 @@ function KeywordForm() {
           </div>
         </div>
       )}
+    
+      {/* Footer */}
+      <footer className="bg-gray-800 p-4 text-center text-gray-400 mt-4">
+        <p className="text-sm">
+          Made with <span className="text-red-500">&hearts;</span> by 
+          <a 
+            href="https://www.linkedin.com/in/nik-k-l/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-400 hover:underline ml-1"
+          >
+            Nik L
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
