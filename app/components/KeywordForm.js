@@ -229,7 +229,7 @@ function KeywordForm() {
           <div className="bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-700 flex-1">
             <h2 className="text-2xl font-bold mb-6 text-gray-200">Search Results</h2>
             <div className="overflow-x-auto">
-              <div className="overflow-y-auto max-h-[calc(100vh-16rem)]"> {/* Adjusted max height */}
+              <div className="overflow-y-auto max-h-[calc(100vh-12rem)]"> {/* Adjusted max height */}
                 <table className="min-w-full divide-y divide-gray-700">
                   <thead className="bg-gray-700">
                     <tr>
