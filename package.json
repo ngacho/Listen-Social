@@ -14,9 +14,11 @@
   "dependencies": {
     "@clerk/nextjs": "^5.2.14",
     "@heroicons/react": "^1.0.6",
+    "@suprsend/node-sdk": "^1.10.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.3",
     "dompurify": "^3.1.6",
+    "mongodb": "^6.8.0",
     "next": "14.2.5",
     "next-auth": "^4.24.7",
     "node-fetch": "^3.3.2",

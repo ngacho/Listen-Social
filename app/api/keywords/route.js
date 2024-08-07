@@ -1,6 +1,8 @@
 import fetch from 'node-fetch';
 import { getAuth } from '@clerk/nextjs/server';
 import { clerkClient } from '@clerk/nextjs/server';
+import clientPromise from '../../lib/mongodb';
+import supr_client from '../../lib/suprsendClient';
 
 // Function to get Reddit access token
 async function getAccessToken() {
@@ -38,23 +40,20 @@ async function fetchRedditPosts({ keywords, resultLimit, sortBy, timeFilter, res
   const query = keywords.join(' ');
 
   const url = new URL(`https://oauth.reddit.com/r/${subreddit || 'all'}/search.json`);
-  
+
   const params = {
     q: query,
     sort: sortBy || 'new',
     t: timeFilter || 'all',
-    limit: resultLimit ? parseInt(resultLimit, 10) : 10, // Ensure resultLimit is an integer and default to 10
-    restrict_sr: restrictSr ? 'true' : 'false', // Convert boolean to string
-    include_facets: includeFacets ? 'true' : 'false', // Convert boolean to string
-    after: after || undefined // Handle pagination
+    limit: resultLimit ? parseInt(resultLimit, 10) : 10,
+    restrict_sr: restrictSr ? 'true' : 'false',
+    include_facets: includeFacets ? 'true' : 'false',
+    after: after || undefined
   };
 
   if (type && type.length > 0) {
     params.type = type.join(',');
   }
-
-  // Log parameters for debugging
-  console.log('Fetching Reddit posts with parameters:', params);
 
   Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
@@ -75,39 +74,51 @@ async function fetchRedditPosts({ keywords, resultLimit, sortBy, timeFilter, res
   return data;
 }
 
-// POST handler for /api/keywords
+// POST handler
 export async function POST(request) {
   try {
     const auth = getAuth(request);
     const { userId } = auth;
 
-    // Parse request body
     const { keywords, sortBy, timeFilter, restrictSr, subreddit, includeFacets, type, resultLimit } = await request.json();
 
-    let finalResultLimit = resultLimit || 10; // Default limit if not provided
+    let finalResultLimit = resultLimit || 10;
 
-    // If user is signed in, fetch their metadata to get limits
     if (userId) {
       try {
+        // Fetch user data from Clerk
         const user = await clerkClient().users.getUser(userId);
-        const metadata = user.unsafeMetadata || {};
-        finalResultLimit = metadata.searchLimits?.maxResults || resultLimit; // Use user-specific limit or the provided limit
+        const email = user.emailAddresses?.[0]?.emailAddress || '';
+
+        if (email && typeof email === 'string' && email.trim() !== '') {
+          // Get SuprSend user instance
+          const suprUser = supr_client.user.get_instance(userId);
+          
+          // Add email to SuprSend user profile
+          suprUser.add_email(email);
+
+          // Save SuprSend user profile
+          const saveResponse = await suprUser.save();
+
+          if (!saveResponse.success) {
+            console.error('Error saving SuprSend user profile:', saveResponse.message);
+          }
+        } else {
+          console.warn('Invalid email:', email);
+        }
       } catch (error) {
         console.error('Error retrieving user metadata:', error);
       }
     }
 
-    // Validate keywords
     if (!Array.isArray(keywords) || keywords.length === 0) {
       return new Response(JSON.stringify({ error: 'Invalid or missing keywords' }), { status: 400 });
     }
 
-    // Apply keyword limit for guest users
     if (!userId && keywords.length > 3) {
       return new Response(JSON.stringify({ error: 'You can only search with a maximum of 3 keywords' }), { status: 400 });
     }
 
-    // Fetch Reddit posts with the appropriate result limit and filters
     const data = await fetchRedditPosts({
       keywords,
       resultLimit: finalResultLimit,
@@ -119,12 +130,20 @@ export async function POST(request) {
       type
     });
 
-    // Log the response for debugging
-    console.log('Reddit posts response:', data);
+    // Save keywords to MongoDB
+    const client = await clientPromise;
+    const db = client.db('myDatabase');
+    const collection = db.collection('userKeywords');
 
-    return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    await collection.updateOne(
+      { userId },
+      { $addToSet: { keywords: { $each: keywords } } }, // Append keywords without duplicates
+      { upsert: true } // Create the document if it doesn't exist
+    );
+
+    return new Response(JSON.stringify({ ...data }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
-    console.error('Error fetching Reddit posts:', error);
-    return new Response(JSON.stringify({ error: 'Error fetching Reddit posts', details: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error('Error processing request:', error);
+    return new Response(JSON.stringify({ error: 'Error processing request', details: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

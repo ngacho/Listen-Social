@@ -20,54 +20,68 @@ function KeywordForm() {
   const { user, isSignedIn } = useUser();
 
   const fetchResults = useCallback(async (action = 'search') => {
-    if (!inputKeywords && action === 'search') return;
+  if (!inputKeywords && action === 'search') return;
 
-    if (action === 'search') setIsSearching(true);
-    if (action === 'refresh') setIsRefreshing(true);
+  if (action === 'search') setIsSearching(true);
+  if (action === 'refresh') setIsRefreshing(true);
 
-    try {
-      const response = await fetch('/api/keywords', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          keywords: inputKeywords.split(',').map(keyword => keyword.trim()),
-          sortBy,
-          timeFilter,
-          resultLimit,
-          restrictSr,
-          subreddit,
-          includeFacets,
-          type
-        })
-      });
+  try {
+    // Save keywords to the server
+    await fetch('/api/save-keywords', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        keywords: inputKeywords.split(',').map(keyword => keyword.trim()),
+        userId: user?.id, // Assuming userId is available from useUser()
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+    // Fetch results from Reddit
+    const response = await fetch('/api/keywords', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        keywords: inputKeywords.split(',').map(keyword => keyword.trim()),
+        sortBy,
+        timeFilter,
+        resultLimit,
+        restrictSr,
+        subreddit,
+        includeFacets,
+        type,
+      }),
+    });
 
-      const data = await response.json();
-      console.log('API Response:', data);
-
-      const processedResults = data.data.children.map(child => ({
-        keyword: inputKeywords.split(',').map(keyword => keyword.trim()).join(', '),
-        title: child.data.title,
-        selftext: child.data.selftext,
-        author: child.data.author,
-        subreddit: child.data.subreddit,
-        url: `https://www.reddit.com${child.data.permalink}`
-      }));
-
-      setResults(processedResults);
-    } catch (error) {
-      console.error('Error fetching results:', error);
-      setResults([]);
-    } finally {
-      if (action === 'search') setIsSearching(false);
-      if (action === 'refresh') setIsRefreshing(false);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
-  }, [inputKeywords, sortBy, timeFilter, resultLimit, restrictSr, subreddit, includeFacets, type]);
+
+    const data = await response.json();
+    console.log('API Response:', data);
+
+    const processedResults = data.data.children.map(child => ({
+      keyword: inputKeywords.split(',').map(keyword => keyword.trim()).join(', '),
+      title: child.data.title,
+      selftext: child.data.selftext,
+      author: child.data.author,
+      subreddit: child.data.subreddit,
+      url: `https://www.reddit.com${child.data.permalink}`,
+    }));
+
+    setResults(processedResults);
+  } catch (error) {
+    console.error('Error fetching results:', error);
+    setResults([]);
+  } finally {
+    if (action === 'search') setIsSearching(false);
+    if (action === 'refresh') setIsRefreshing(false);
+  }
+}, [inputKeywords, sortBy, timeFilter, resultLimit, restrictSr, subreddit, includeFacets, type, user?.id]);
+
 
   usePolling(fetchResults, 86400000); // Poll every 24 hours
 
