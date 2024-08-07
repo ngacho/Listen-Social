@@ -94,8 +94,16 @@ function KeywordForm() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 transition-colors duration-300 ease-in">
       <nav className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
-        <div className="container mx-auto flex items-center justify-between">
-          <h1 className="text-white text-2xl font-bold">Listen Social</h1>
+    <div className="container mx-auto flex items-center justify-between">
+    <a href="/" className="flex items-center">
+  <img 
+    src="/listen-social-favicon-color.png" 
+    alt="Listen Social Logo" 
+    className="w-10 h-auto" // Use Tailwind's width (w-) and height (h-) utilities
+  />
+  <h1 className="text-white text-2xl font-bold ml-2">Listen Social</h1>
+</a>
+
           <div>
             {isSignedIn ? (
               <UserButton />
