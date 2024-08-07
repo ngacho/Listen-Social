@@ -82,35 +82,6 @@ export async function POST(request) {
 
     const { keywords, sortBy, timeFilter, restrictSr, subreddit, includeFacets, type, resultLimit } = await request.json();
 
-    let finalResultLimit = resultLimit || 10;
-
-    if (userId) {
-      try {
-        // Fetch user data from Clerk
-        const user = await clerkClient().users.getUser(userId);
-        const email = user.emailAddresses?.[0]?.emailAddress || '';
-
-        if (email && typeof email === 'string' && email.trim() !== '') {
-          // Get SuprSend user instance
-          const suprUser = supr_client.user.get_instance(userId);
-          
-          // Add email to SuprSend user profile
-          suprUser.add_email(email);
-
-          // Save SuprSend user profile
-          const saveResponse = await suprUser.save();
-
-          if (!saveResponse.success) {
-            console.error('Error saving SuprSend user profile:', saveResponse.message);
-          }
-        } else {
-          console.warn('Invalid email:', email);
-        }
-      } catch (error) {
-        console.error('Error retrieving user metadata:', error);
-      }
-    }
-
     if (!Array.isArray(keywords) || keywords.length === 0) {
       return new Response(JSON.stringify({ error: 'Invalid or missing keywords' }), { status: 400 });
     }
@@ -119,16 +90,20 @@ export async function POST(request) {
       return new Response(JSON.stringify({ error: 'You can only search with a maximum of 3 keywords' }), { status: 400 });
     }
 
-    const data = await fetchRedditPosts({
-      keywords,
-      resultLimit: finalResultLimit,
-      sortBy,
-      timeFilter,
-      restrictSr,
-      subreddit,
-      includeFacets,
-      type
-    });
+    // Only fetch Reddit posts if keywords are present
+    let data = {};
+    if (keywords.length > 0) {
+      data = await fetchRedditPosts({
+        keywords,
+        resultLimit: resultLimit || 10,
+        sortBy,
+        timeFilter,
+        restrictSr,
+        subreddit,
+        includeFacets,
+        type
+      });
+    }
 
     // Save keywords to MongoDB
     const client = await clientPromise;
