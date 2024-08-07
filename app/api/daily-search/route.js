@@ -36,7 +36,7 @@ async function sendEvent(userId, results) {
       'daily_search_results',  // Event name should match the one from your SuprSend workflow
       properties,
       {
-        tenant_id: 'your_tenant_id',  // Optional
+        tenant_id: 'default',  // Optional
         idempotency_key: `${userId}-${Date.now()}`,  // Generate a unique idempotency key
       }
     );
