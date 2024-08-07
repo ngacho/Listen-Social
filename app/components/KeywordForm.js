@@ -259,6 +259,7 @@ function KeywordForm() {
       author: result.author,
       url: result.url,
       selftext: result.selftext,
+      subreddit: result.subreddit,
     })
   }
 >
@@ -306,51 +307,77 @@ function KeywordForm() {
       </div>
   
       {selectedText && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-8 rounded-lg w-full max-w-4xl relative max-h-[90vh] overflow-auto">
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
-            >
-              <XCircleIcon className="h-6 w-6" />
-            </button>
-            <h2 className="text-2xl font-bold mb-4 text-gray-200">Post Details</h2>
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:space-x-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-300">Title:</h3>
-                  <p className="text-gray-200">
-                    {selectedText.title || "N/A"}
-                  </p>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-300">Author:</h3>
-                  <p className="text-gray-200">
-                    {selectedText.author || "N/A"}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-300">Text:</h3>
-                <p className="text-gray-200 whitespace-pre-wrap">
-                  {selectedText.selftext || "N/A"}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-300">URL:</h3>
+  <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div className="bg-gray-800 p-8 rounded-lg w-full max-w-4xl relative max-h-[90vh] overflow-auto">
+      <button
+        onClick={closeModal}
+        className="absolute top-4 right-4 text-gray-400 hover:text-white"
+      >
+        <XCircleIcon className="h-6 w-6" />
+      </button>
+      <h2 className="text-2xl font-bold mb-4 text-gray-200">Post Details</h2>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:space-x-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-300">Title:</h3>
+            <p className="text-gray-200">
+              {selectedText.title || "N/A"}
+            </p>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-300">Author:</h3>
+            <p className="text-gray-200">
+              {selectedText.author ? (
                 <a
-                  href={selectedText.url}
+                  href={`https://www.reddit.com/user/${selectedText.author}`}
                   className="text-blue-400 hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  View Post
+                  {selectedText.author}
                 </a>
-              </div>
-            </div>
+              ) : "N/A"}
+            </p>
           </div>
         </div>
-      )}     
+        <div>
+          <h3 className="text-lg font-semibold text-gray-300">Subreddit:</h3>
+          <p className="text-gray-200">
+            {selectedText.subreddit ? (
+              <a
+                href={`https://www.reddit.com/r/${selectedText.subreddit}`}
+                className="text-blue-400 hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {selectedText.subreddit}
+              </a>
+            ) : "N/A"}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-300">Text:</h3>
+          <p className="text-gray-200 whitespace-pre-wrap">
+            {selectedText.selftext || "N/A"}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-300">URL:</h3>
+          <a
+            href={selectedText.url}
+            className="text-blue-400 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Post
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+     
     </div>
   );
 }
