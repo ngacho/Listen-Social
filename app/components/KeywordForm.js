@@ -3,6 +3,7 @@ import usePolling from './usePolling'; // Adjust the path as necessary
 import { RefreshIcon, SearchIcon } from '@heroicons/react/solid'; // Import icons
 import { XCircleIcon } from '@heroicons/react/solid'; // Import close icon
 import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
+import { ExternalLinkIcon } from '@heroicons/react/solid';
 
 function KeywordForm() {
   const [inputKeywords, setInputKeywords] = useState('');
@@ -112,116 +113,115 @@ function KeywordForm() {
           <div className="bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-700 w-full max-w-md">
             <h1 className="text-3xl font-bold mb-6 text-gray-200 text-center">Keyword Search</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Enter keywords separated by commas"
-                value={inputKeywords}
-                onChange={(e) => setInputKeywords(e.target.value)}
-                required
-                className="border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in"
-              />
-              <div className="flex space-x-4">
-                <div className="relative flex-1">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    disabled={!isSignedIn}
-                    className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
-                  >
-                    <option value="relevance">Relevance</option>
-                    <option value="hot">Hot</option>
-                    <option value="top">Top</option>
-                    <option value="new">New</option>
-                    <option value="comments">Comments</option>
-                  </select>
-                  {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
-                </div>
-                <div className="relative flex-1">
-                  <select
-                    value={timeFilter}
-                    onChange={(e) => setTimeFilter(e.target.value)}
-                    disabled={!isSignedIn}
-                    className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
-                  >
-                    <option value="hour">Past Hour</option>
-                    <option value="day">Past Day</option>
-                    <option value="week">Past Week</option>
-                    <option value="month">Past Month</option>
-                    <option value="year">Past Year</option>
-                    <option value="all">All Time</option>
-                  </select>
-                  {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
-                </div>
-                <div className="relative flex-1">
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={resultLimit}
-                    onChange={(e) => setResultLimit(e.target.value)}
-                    disabled={!isSignedIn}
-                    className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
-                  />
-                  {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
-                </div>
-              </div>
-              <label className="flex items-center relative">
-                <input
-                  type="text"
-                  placeholder="Restrict to this subreddit"
-                  value={subreddit}
-                  onChange={(e) => setSubreddit(e.target.value)}
-                  disabled={!isSignedIn}
-                  className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
-                />
-                {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={restrictSr}
-                  onChange={(e) => setRestrictSr(e.target.checked)}
-                  disabled={!isSignedIn}
-                  className={`mr-2 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}
-                />
-                <span className={`text-gray-200 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}>Restrict to Subreddit</span>
-              </label>
-              <div className="flex space-x-4">
-              <button
-                type="submit"
-                disabled={isSearching || isRefreshing}
-                className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 ease-in ${isSearching ? 'bg-blue-500 cursor-not-allowed' : ''}`}
-              >
-                {isSearching ? (
-                  <span className="flex items-center justify-center">
-                    Searching... <SearchIcon className="w-5 h-5 ml-2 animate-spin" />
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center">
-                    Search <SearchIcon className="w-5 h-5 ml-2" />
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className={`bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300 ease-in ${isRefreshing ? 'bg-gray-500 cursor-not-allowed' : ''}`}
-              >
-                {isRefreshing ? (
-                  <span className="flex items-center justify-center">
-                    Refreshing... <RefreshIcon className="w-5 h-5 ml-2 animate-spin" />
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center">
-                    Refresh <RefreshIcon className="w-5 h-5 ml-2" />
-                  </span>
-                )}
-              </button>
-</div>
+  <input
+    type="text"
+    placeholder="Enter keywords separated by commas"
+    value={inputKeywords}
+    onChange={(e) => setInputKeywords(e.target.value)}
+    required
+    className="border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in"
+  />
+  <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4">
+    <div className="relative flex-1">
+      <select
+        value={sortBy}
+        onChange={(e) => setSortBy(e.target.value)}
+        disabled={!isSignedIn}
+        className={`border border-gray-600 bg-gray-700 p-4 pr-12 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
+      >
+        <option value="relevance">Relevance</option>
+        <option value="hot">Hot</option>
+        <option value="top">Top</option>
+        <option value="new">New</option>
+        <option value="comments">Comments</option>
+      </select>
+      {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
+    </div>
+    <div className="relative flex-1">
+      <select
+        value={timeFilter}
+        onChange={(e) => setTimeFilter(e.target.value)}
+        disabled={!isSignedIn}
+        className={`border border-gray-600 bg-gray-700 p-4 pr-12 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
+      >
+        <option value="hour">Past Hour</option>
+        <option value="day">Past Day</option>
+        <option value="week">Past Week</option>
+        <option value="month">Past Month</option>
+        <option value="year">Past Year</option>
+        <option value="all">All Time</option>
+      </select>
+      {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
+    </div>
+    <div className="relative flex-1">
+      <input
+        type="number"
+        min="1"
+        max="100"
+        value={resultLimit}
+        onChange={(e) => setResultLimit(e.target.value)}
+        disabled={!isSignedIn}
+        className={`border border-gray-600 bg-gray-700 p-4 pr-12 rounded-lg w-full text-gray-200 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
+      />
+      {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
+    </div>
+  </div>
+  <div className="relative flex-1">
+    <input
+      type="text"
+      placeholder="Restrict to this subreddit"
+      value={subreddit}
+      onChange={(e) => setSubreddit(e.target.value)}
+      disabled={!isSignedIn}
+      className={`border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-400 focus:border-blue-400 transition-colors duration-300 ease-in ${!isSignedIn ? 'bg-gray-600 cursor-not-allowed' : ''}`}
+    />
+    {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
+  </div>
+  <label className="flex items-center space-x-2">
+    <input
+      type="checkbox"
+      checked={restrictSr}
+      onChange={(e) => setRestrictSr(e.target.checked)}
+      disabled={!isSignedIn}
+      className={`h-5 w-5 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}
+    />
+    <span className={`text-gray-200 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}>Restrict to Subreddit</span>
+  </label>
+  <div className="flex space-x-4">
+    <button
+      type="submit"
+      disabled={isSearching || isRefreshing}
+      className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 ease-in ${isSearching ? 'bg-blue-500 cursor-not-allowed' : ''}`}
+    >
+      {isSearching ? (
+        <span className="flex items-center justify-center">
+          Searching... <SearchIcon className="w-5 h-5 ml-2 animate-spin" />
+        </span>
+      ) : (
+        <span className="flex items-center justify-center">
+          Search <SearchIcon className="w-5 h-5 ml-2" />
+        </span>
+      )}
+    </button>
+    <button
+      type="button"
+      onClick={handleRefresh}
+      disabled={isRefreshing}
+      className={`bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300 ease-in ${isRefreshing ? 'bg-gray-500 cursor-not-allowed' : ''}`}
+    >
+      {isRefreshing ? (
+        <span className="flex items-center justify-center">
+          Refreshing... <RefreshIcon className="w-5 h-5 ml-2 animate-spin" />
+        </span>
+      ) : (
+        <span className="flex items-center justify-center">
+          Refresh <RefreshIcon className="w-5 h-5 ml-2" />
+        </span>
+      )}
+    </button>
+  </div>
+</form>
 
-
-            </form>
           </div>
         </div>
 
@@ -235,7 +235,7 @@ function KeywordForm() {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Keyword</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Title</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Text</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Text (Click</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Author</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Subreddit</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">URL</th>
@@ -252,20 +252,21 @@ function KeywordForm() {
                             </div>
                           </td>
                           <td
-                            className="px-6 py-4 text-sm text-gray-200 cursor-pointer"
-                            onClick={() =>
-                              handleTextClick({
-                                title: result.title,
-                                author: result.author,
-                                url: result.url,
-                                selftext: result.selftext,
-                              })
-                            }
-                          >
-                            <div className="max-w-xs h-20 overflow-hidden text-ellipsis">
-                              {result.selftext || "N/A"}
-                            </div>
-                          </td>
+  className="px-6 py-4 text-sm text-gray-200 cursor-pointer hover:bg-gray-700 transition-colors duration-300 ease-in"
+  onClick={() =>
+    handleTextClick({
+      title: result.title,
+      author: result.author,
+      url: result.url,
+      selftext: result.selftext,
+    })
+  }
+>
+  <div className="max-w-xs h-20 overflow-hidden text-ellipsis">
+    {result.selftext || "N/A"}
+  </div>
+</td>
+
                           <td className="px-6 py-4 text-sm text-gray-200">
                             {result.author || "N/A"}
                           </td>
@@ -274,14 +275,15 @@ function KeywordForm() {
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-200">
                             {result.url ? (
-                              <a
-                                href={result.url}
-                                className="text-blue-400 hover:underline"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                View Post
-                              </a>
+                             <a
+                             href={result.url}
+                             className="text-blue-400 hover:underline flex items-center"
+                             target="_blank"
+                             rel="noopener noreferrer"
+                           >
+                             <ExternalLinkIcon className="w-5 h-5" />
+                            
+                           </a>
                             ) : (
                               "N/A"
                             )}
