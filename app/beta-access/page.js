@@ -14,11 +14,11 @@ const BetaAccessPage = () => {
             <p className="text-gray-300 mb-6">
               Hi there,
               <br /><br />
-              With many years of experience in growth and marketing, I’ve witnessed firsthand how rapidly the landscape evolves. One question that has always intrigued me is whether we can enhance inbound marketing to enable faster growth for companies. My belief is that being part of conversations where potential buyers discuss your solution is key to driving initial revenue.
+              With many years of experience in growth and marketing, I&#39;ve witnessed firsthand how rapidly the landscape evolves. One question that has always intrigued me is whether we can enhance inbound marketing to enable faster growth for companies. My belief is that being part of conversations where potential buyers discuss your solution is key to driving initial revenue.
               <br /><br />
-              Current social listening tools are often costly and might be out of reach for many SMB marketers. Moreover, these tools often lack certain essential features. That's where my tool comes into play.
+              Current social listening tools are often costly and might be out of reach for many SMB marketers. Moreover, these tools often lack certain essential features. That&#39;s where my tool comes into play.
               <br /><br />
-              I’m developing a tool that aims to offer a superior social listening workflow starting from a notification system. Here’s what the upcoming notification system will include:
+              I&#39;m developing a tool that aims to offer a superior social listening workflow starting from a notification system. Here&#39;s what the upcoming notification system will include:
             </p>
             <div className="bg-gray-700 p-4 rounded-lg mb-6">
               <h3 className="text-lg font-semibold text-gray-100 mb-2">Key Features:</h3>
@@ -29,7 +29,7 @@ const BetaAccessPage = () => {
               </ul>
             </div>
             <p className="text-gray-300 mt-6">
-              The tool is free to use, and I’m currently seeking early adopters to provide feedback. If you’re interested in accessing the beta, please fill out the form below.
+              The tool is free to use, and I&#39;m currently seeking early adopters to provide feedback. If you&#39;re interested in accessing the beta, please fill out the form below.
               <br /><br />
               Thank you for your interest and support!
             </p>
