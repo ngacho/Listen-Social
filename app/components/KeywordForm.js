@@ -337,7 +337,7 @@ function KeywordForm() {
   
       {selectedText && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-8 rounded-lg w-full max-w-4xl relative">
+          <div className="bg-gray-800 p-8 rounded-lg w-full max-w-4xl relative max-h-[90vh] overflow-auto">
             <button
               onClick={closeModal}
               className="absolute top-4 right-4 text-gray-400 hover:text-white"
