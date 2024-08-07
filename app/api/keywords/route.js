@@ -81,40 +81,40 @@ export async function POST(request) {
     const auth = getAuth(request);
     const { userId } = auth;
 
-    let resultLimit = 10; // Default limit for guests
-    const keywordLimit = 3; // Limit to 3 keywords for guests
+    // Parse request body
+    const { keywords, sortBy, timeFilter, restrictSr, subreddit, includeFacets, type, resultLimit } = await request.json();
+
+    let finalResultLimit = resultLimit || 10; // Default limit if not provided
 
     // If user is signed in, fetch their metadata to get limits
     if (userId) {
       try {
         const user = await clerkClient().users.getUser(userId);
         const metadata = user.unsafeMetadata || {};
-        resultLimit = metadata.searchLimits?.maxResults || 40; // Default limit for signed-in users
+        finalResultLimit = metadata.searchLimits?.maxResults || resultLimit; // Use user-specific limit or the provided limit
       } catch (error) {
         console.error('Error retrieving user metadata:', error);
       }
     }
-
-    const { keywords, sortBy, timeFilter, restrictSr, subreddit, includeFacets, type } = await request.json();
 
     // Validate keywords
     if (!Array.isArray(keywords) || keywords.length === 0) {
       return new Response(JSON.stringify({ error: 'Invalid or missing keywords' }), { status: 400 });
     }
 
-    // Apply keyword limit only for guest users
-    if (!userId && keywords.length > keywordLimit) {
-      return new Response(JSON.stringify({ error: `You can only search with a maximum of ${keywordLimit} keywords` }), { status: 400 });
+    // Apply keyword limit for guest users
+    if (!userId && keywords.length > 3) {
+      return new Response(JSON.stringify({ error: 'You can only search with a maximum of 3 keywords' }), { status: 400 });
     }
 
     // Fetch Reddit posts with the appropriate result limit and filters
     const data = await fetchRedditPosts({
       keywords,
-      resultLimit,
+      resultLimit: finalResultLimit,
       sortBy,
       timeFilter,
       restrictSr,
-      subreddit, // Pass subreddit parameter
+      subreddit,
       includeFacets,
       type
     });
