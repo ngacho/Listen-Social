@@ -19,10 +19,11 @@ function KeywordForm() {
   const [type, setType] = useState([]);
   const { user, isSignedIn } = useUser();
 
-  const fetchResults = useCallback(async () => {
-    if (!inputKeywords) return;
+  const fetchResults = useCallback(async (action = 'search') => {
+    if (!inputKeywords && action === 'search') return;
 
-    setIsSearching(true);
+    if (action === 'search') setIsSearching(true);
+    if (action === 'refresh') setIsRefreshing(true);
 
     try {
       const response = await fetch('/api/keywords', {
@@ -36,7 +37,7 @@ function KeywordForm() {
           timeFilter,
           resultLimit,
           restrictSr,
-          subreddit, // Use subreddit for filtering
+          subreddit,
           includeFacets,
           type
         })
@@ -63,7 +64,8 @@ function KeywordForm() {
       console.error('Error fetching results:', error);
       setResults([]);
     } finally {
-      setIsSearching(false);
+      if (action === 'search') setIsSearching(false);
+      if (action === 'refresh') setIsRefreshing(false);
     }
   }, [inputKeywords, sortBy, timeFilter, resultLimit, restrictSr, subreddit, includeFacets, type]);
 
@@ -71,14 +73,15 @@ function KeywordForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    fetchResults();
+    fetchResults('search');
   };
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await fetchResults();
-    setIsRefreshing(false);
+    if (isRefreshing) return; // Prevent multiple refreshes
+    fetchResults('refresh');
   };
+
+  
 
   const handleTextClick = (data) => {
     setSelectedText(data);
@@ -194,22 +197,40 @@ function KeywordForm() {
                 <span className={`text-gray-200 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}>Restrict to Subreddit</span>
               </label>
               <div className="flex space-x-4">
-                <button
-                  type="submit"
-                  disabled={isSearching}
-                  className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 ease-in ${isSearching ? 'bg-blue-500 cursor-not-allowed' : ''}`}
-                >
-                  {isSearching ? <span className="flex items-center justify-center">Searching... <SearchIcon className="w-5 h-5 ml-2" /></span> : <span className="flex items-center justify-center">Search <SearchIcon className="w-5 h-5 ml-2" /></span>}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRefresh}
-                  disabled={isRefreshing}
-                  className={`bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300 ease-in ${isRefreshing ? 'bg-gray-500 cursor-not-allowed' : ''}`}
-                >
-                  {isRefreshing ? <span className="flex items-center justify-center">Refreshing... <RefreshIcon className="w-5 h-5 ml-2" /></span> : <span className="flex items-center justify-center">Refresh <RefreshIcon className="w-5 h-5 ml-2" /></span>}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={isSearching || isRefreshing}
+                className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 ease-in ${isSearching ? 'bg-blue-500 cursor-not-allowed' : ''}`}
+              >
+                {isSearching ? (
+                  <span className="flex items-center justify-center">
+                    Searching... <SearchIcon className="w-5 h-5 ml-2 animate-spin" />
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center">
+                    Search <SearchIcon className="w-5 h-5 ml-2" />
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className={`bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300 ease-in ${isRefreshing ? 'bg-gray-500 cursor-not-allowed' : ''}`}
+              >
+                {isRefreshing ? (
+                  <span className="flex items-center justify-center">
+                    Refreshing... <RefreshIcon className="w-5 h-5 ml-2 animate-spin" />
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center">
+                    Refresh <RefreshIcon className="w-5 h-5 ml-2" />
+                  </span>
+                )}
+              </button>
+</div>
+
+
             </form>
           </div>
         </div>
