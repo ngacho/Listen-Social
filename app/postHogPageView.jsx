@@ -1,4 +1,3 @@
-// app/PostHogPageView.jsx f
 'use client'
 
 import { usePathname, useSearchParams } from "next/navigation";

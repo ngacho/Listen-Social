@@ -1,5 +1,6 @@
-// app/providers.js
 'use client'
+// app/providers.js
+
 import posthog from 'posthog-js'
 import { PostHogProvider } from 'posthog-js/react'
 
@@ -8,7 +9,7 @@ if (typeof window !== 'undefined') {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     person_profiles: 'identified_only',
     capture_pageview: false,
-    capture_pageleave: true // Enable pageleave capture
+    capture_pageleave: true
   })
 }
 
