@@ -111,7 +111,7 @@ function KeywordForm() {
       <div className="flex flex-1 transition-all duration-300 ease-in">
         <div className="w-full lg:w-1/3 p-6 flex justify-center items-center">
           <div className="bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-700 w-full max-w-md">
-            <h1 className="text-3xl font-bold mb-6 text-gray-200 text-center">Keyword Search</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-200 text-center">Keyword Search (Reddit)</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
   <input
     type="text"

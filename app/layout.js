@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
               <div className="flex items-center">
                 <a href="/beta-access">
                   <button className="bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition-colors duration-300 ease-in ml-4">
-                    Request Beta Access
+                    Get Notifications Access
                   </button>
                 </a>
                 <div className="ml-3.5"> {/* Increased margin here */}
