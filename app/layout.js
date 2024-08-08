@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import "./globals.css";
 import { CSPostHogProvider, PHProvider } from './providers';
 
-const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
+const PostHogPageView = dynamic(() => import('./PostHogPageView.jsx'), {
   ssr: false,
 });
 
