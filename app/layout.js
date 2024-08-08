@@ -2,9 +2,10 @@ import { Inter } from "next/font/google";
 import { ClerkProvider, UserButton, SignInButton, SignUpButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import Image from 'next/image';
 import "./globals.css";
-import { PHProvider } from './providers'
-import dynamic from 'next/dynamic'
-import { Analytics } from "@vercel/analytics/react"
+import { PHProvider } from './providers';
+import dynamic from 'next/dynamic';
+import { Analytics } from "@vercel/analytics/react";
+import Script from 'next/script';
 
 const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false,
@@ -22,42 +23,48 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en">
         <PHProvider>
-            <body className={inter.className}>
-              <PostHogPageView /> 
-              {/* Header */}
-              <nav className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
-                <div className="container mx-auto flex items-center justify-between">
-                  <a href="/" className="flex items-center">
-                    <Image 
-                      src="/listen-social-favicon-color.png" 
-                      alt="Listen Social Logo" 
-                      width={40} 
-                      height={40} 
-                      className="w-10 h-auto" 
-                    />
-                    <h1 className="text-white text-2xl font-bold ml-2">Listen Social</h1>
+          <body className={inter.className}>
+            <Script id="vector-script" strategy="afterInteractive">
+              {`
+                !function(e,r){try{if(e.vector)return void console.log("Vector snippet included more than once.");var t={};t.q=t.q||[];for(var o=["load","identify","on"],n=function(e){return function(){var r=Array.prototype.slice.call(arguments);t.q.push([e,r])}},c=0;c<o.length;c++){var a=o[c];t[a]=n(a)}if(e.vector=t,!t.loaded){var i=r.createElement("script");i.type="text/javascript",i.async=!0,i.src="https://cdn.vector.co/pixel.js";var l=r.getElementsByTagName("script")[0];l.parentNode.insertBefore(i,l),t.loaded=!0}}catch(e){console.error("Error loading Vector:",e)}}(window,document);
+                vector.load("152f2a86-73f4-44de-b8b0-a09b487f76f2");
+              `}
+            </Script>
+            <PostHogPageView />
+            {/* Header */}
+            <nav className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
+              <div className="container mx-auto flex items-center justify-between">
+                <a href="/" className="flex items-center">
+                  <Image 
+                    src="/listen-social-favicon-color.png" 
+                    alt="Listen Social Logo" 
+                    width={40} 
+                    height={40} 
+                    className="w-10 h-auto" 
+                  />
+                  <h1 className="text-white text-2xl font-bold ml-2">Listen Social</h1>
+                </a>
+                <div className="flex items-center">
+                  <a href="/beta-access">
+                    <button className="bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition-colors duration-300 ease-in ml-4">
+                      Get Notifications Access
+                    </button>
                   </a>
-                  <div className="flex items-center">
-                    <a href="/beta-access">
-                      <button className="bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition-colors duration-300 ease-in ml-4">
-                        Get Notifications Access
-                      </button>
-                    </a>
-                    <div className="ml-3.5">
-                      <SignedIn>
-                        <UserButton />
-                      </SignedIn>
-                      <SignedOut>
-                        <SignInButton>
-                          <button className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors duration-300 ease-in ml-4">
-                            Sign In
-                          </button>
-                        </SignInButton>
-                        <SignUpButton>
-                          <button className="ml-4 bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors duration-300 ease-in">
-                            Sign Up
-                          </button>
-                        </SignUpButton>
+                  <div className="ml-3.5">
+                    <SignedIn>
+                      <UserButton />
+                    </SignedIn>
+                    <SignedOut>
+                      <SignInButton>
+                        <button className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors duration-300 ease-in ml-4">
+                          Sign In
+                        </button>
+                      </SignInButton>
+                      <SignUpButton>
+                        <button className="ml-4 bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors duration-300 ease-in">
+                          Sign Up
+                        </button>
+                      </SignUpButton>
                       </SignedOut>
                     </div>
                   </div>
