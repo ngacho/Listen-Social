@@ -3,10 +3,10 @@ import { ClerkProvider, UserButton, SignInButton, SignUpButton, SignedIn, Signed
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import "./globals.css";
-import { CSPostHogProvider, PHProvider } from './providers';
+import { PHProvider } from './providers';
 
 // Explicitly include the .jsx extension
-const PostHogPageView = dynamic(() => import('./PostHogPageView.jsx'), {
+const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false,
 });
 
@@ -22,7 +22,6 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en">
         <PHProvider>
-          <CSPostHogProvider>
             <body className={inter.className}>
               <PostHogPageView /> 
               {/* Header */}
@@ -83,7 +82,6 @@ export default function RootLayout({ children }) {
                 </p>
               </footer>
             </body>
-          </CSPostHogProvider>
         </PHProvider>
       </html>
     </ClerkProvider>
