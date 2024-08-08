@@ -29,9 +29,16 @@ const BetaAccessPage = () => {
               </ul>
             </div>
             <p className="text-gray-300 mt-6">
-              The tool is free to use, and I&#39;m currently seeking early adopters to provide feedback. If you&#39;re interested in accessing the beta, please fill out the form below.
+              The tool is free to use, and I&#39;m currently seeking early adopters to provide feedback. If you&#39;re interested in accessing the beta, please fill out the form below. Feel free to DM me on<a 
+                href="https://www.linkedin.com/in/nik-k-l/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-400 hover:underline ml-1"
+              >
+                LinkedIn
+              </a> with your queries/ feedback. 
               <br /><br />
-              Thank you for your interest and support!
+              Nik, your fellow marketer!
             </p>
           </div>
         </div>
