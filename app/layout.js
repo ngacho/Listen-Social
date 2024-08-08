@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import "./globals.css";
 import { CSPostHogProvider, PHProvider } from './providers';
 
+// Explicitly include the .jsx extension
 const PostHogPageView = dynamic(() => import('./PostHogPageView.jsx'), {
   ssr: false,
 });
