@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic'
 
 const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false,
-})
+});
 
 const inter = Inter({ subsets: ["latin"] });
 
