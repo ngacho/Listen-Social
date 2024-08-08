@@ -4,6 +4,7 @@ import Image from 'next/image';
 import "./globals.css";
 import { PHProvider } from './providers'
 import dynamic from 'next/dynamic'
+import { Analytics } from "@vercel/analytics/react"
 
 const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false,
@@ -80,6 +81,7 @@ export default function RootLayout({ children }) {
                   </a>
                 </p>
               </footer>
+              <Analytics />
             </body>
         </PHProvider>
       </html>
