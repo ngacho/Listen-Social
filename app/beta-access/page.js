@@ -16,9 +16,9 @@ const BetaAccessPage = () => {
               <br /><br />
               With many years of experience in growth and marketing, I&#39;ve witnessed firsthand how rapidly the landscape evolves. One question that has always intrigued me is whether we can enhance inbound marketing to enable faster growth for companies. My belief is that being part of conversations where potential buyers discuss your solution is key to driving initial revenue.
               <br /><br />
-              Current social listening tools are often costly and might be out of reach for many SMB marketers. Moreover, these tools often lack certain essential features. That&#39;s where my tool comes into play.
+              Current social listening tools are often costly and might be out of reach for many SMB marketers.
               <br /><br />
-              I&#39;m developing a tool that aims to offer a superior social listening workflow starting from a notification system. Here&#39;s what the upcoming notification system will include:
+              I&#39;m developing a tool that aims to offer a superior social listening workflow, starting from a proactive notification system. Here&#39;s what the upcoming notification system will include:
             </p>
             <div className="bg-gray-700 p-4 rounded-lg mb-6">
               <h3 className="text-lg font-semibold text-gray-100 mb-2">Key Features:</h3>
