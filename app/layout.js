@@ -14,9 +14,30 @@ const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
+  metadataBase: new URL('https://listen-social.vercel.app/'),  // Replace with your actual domain
   title: "Listen Social",
   description: "Reddit social listener tool",
+  openGraph: {
+    title: "Listen Social",
+    description: "Reddit social listener tool",
+    images: [
+      {
+        url: "/listen-social-favicon-color.png",  // Relative path
+        width: 800,
+        height: 600,
+        alt: "Listen Social Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Listen Social",
+    description: "Reddit social listener tool",
+    images: ["/listen-social-favicon-color.png"],  // Relative path
+  },
 };
+
+
 
 export default function RootLayout({ children }) {
   return (
