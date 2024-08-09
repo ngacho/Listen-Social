@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
             </Script>
             <PostHogPageView />
             {/* Header */}
-            <nav className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
+            <nav className="bg-gray-900 p-4 shadow-md sticky top-0 z-10">
               <div className="container mx-auto flex items-center justify-between">
                 <a href="/" className="flex items-center">
                   <Image 
@@ -46,30 +46,31 @@ export default function RootLayout({ children }) {
                 </a>
                 <div className="flex items-center">
                   <a href="/beta-access">
-                    <button className="bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition-colors duration-300 ease-in ml-4">
+                    <button className="bg-purple-600 text-white px-5 py-2 rounded-full shadow-lg hover:bg-purple-700 transition-transform transform hover:scale-105 duration-300 ease-in ml-4">
                       Get Notifications Access
                     </button>
                   </a>
-                  <div className="ml-3.5">
+                  <div className="ml-4">
                     <SignedIn>
                       <UserButton />
                     </SignedIn>
                     <SignedOut>
                       <SignInButton>
-                        <button className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors duration-300 ease-in ml-4">
+                        <button className="bg-blue-600 text-white px-5 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300 ease-in ml-4">
                           Sign In
                         </button>
                       </SignInButton>
                       <SignUpButton>
-                        <button className="ml-4 bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors duration-300 ease-in">
+                        <button className="ml-4 bg-green-600 text-white px-5 py-2 rounded-full shadow-lg hover:bg-green-700 transition-transform transform hover:scale-105 duration-300 ease-in">
                           Sign Up
                         </button>
                       </SignUpButton>
-                      </SignedOut>
-                    </div>
+                    </SignedOut>
                   </div>
                 </div>
-              </nav>
+              </div>
+            </nav>
+
               {/* Main Content */}
               <main>
                 {children}
