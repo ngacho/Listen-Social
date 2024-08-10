@@ -8,11 +8,12 @@ import { AnimatePresence, motion } from "framer-motion";
 
 function KeywordForm() {
   const [inputKeywords, setInputKeywords] = useState('');
+  const [isPhraseMatching, setIsPhraseMatching] = useState(false);
   const [results, setResults] = useState([]);
   const [selectedText, setSelectedText] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [sortBy, setSortBy] = useState('relevance');
+  const [sortBy, setSortBy] = useState('new');
   const [timeFilter, setTimeFilter] = useState('all');
   const [resultLimit, setResultLimit] = useState(10);
   const [restrictSr, setRestrictSr] = useState(false);
@@ -21,76 +22,87 @@ function KeywordForm() {
   const [type, setType] = useState([]);
   const { user, isSignedIn } = useUser();
 
-  const fetchResults = useCallback(async (action = 'search') => {
-  if (!inputKeywords && action === 'search') return;
-
-  if (action === 'search') setIsSearching(true);
-  if (action === 'refresh') setIsRefreshing(true);
-
-  try {
-    // Save keywords to the server
-    await fetch('/api/save-keywords', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        keywords: inputKeywords.split(',').map(keyword => keyword.trim()),
-        userId: user?.id, // Assuming userId is available from useUser()
-      }),
-    });
-
-    // Fetch results from Reddit
-    const response = await fetch('/api/keywords', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        keywords: inputKeywords.split(',').map(keyword => keyword.trim()),
-        sortBy,
-        timeFilter,
-        resultLimit,
-        restrictSr,
-        subreddit,
-        includeFacets,
-        type,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+  const fetchResults = useCallback(async (action = 'search', finalKeywords) => {
+    if (!finalKeywords && action === 'search') return;
+  
+    if (action === 'search') setIsSearching(true);
+    if (action === 'refresh') setIsRefreshing(true);
+  
+    try {
+      // Save keywords to the server
+      await fetch('/api/save-keywords', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          keywords: finalKeywords,
+          userId: user?.id, // Assuming userId is available from useUser()
+        }),
+      });
+  
+      // Fetch results from Reddit
+      const response = await fetch('/api/keywords', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          keywords: finalKeywords,
+          sortBy,
+          timeFilter,
+          resultLimit,
+          restrictSr,
+          subreddit,
+          includeFacets,
+          type,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const data = await response.json();
+      console.log('API Response:', data);
+  
+      const processedResults = data.data.children.map(child => ({
+        keyword: isPhraseMatching ? finalKeywords[0].replace(/"/g, '') : finalKeywords.join(', '),
+        title: child.data.title,
+        selftext: child.data.selftext,
+        author: child.data.author,
+        subreddit: child.data.subreddit,
+        url: `https://www.reddit.com${child.data.permalink}`,
+      }));
+  
+      setResults(processedResults);
+    } catch (error) {
+      console.error('Error fetching results:', error);
+      setResults([]);
+    } finally {
+      if (action === 'search') setIsSearching(false);
+      if (action === 'refresh') setIsRefreshing(false);
     }
-
-    const data = await response.json();
-    console.log('API Response:', data);
-
-    const processedResults = data.data.children.map(child => ({
-      keyword: inputKeywords.split(',').map(keyword => keyword.trim()).join(', '),
-      title: child.data.title,
-      selftext: child.data.selftext,
-      author: child.data.author,
-      subreddit: child.data.subreddit,
-      url: `https://www.reddit.com${child.data.permalink}`,
-    }));
-
-    setResults(processedResults);
-  } catch (error) {
-    console.error('Error fetching results:', error);
-    setResults([]);
-  } finally {
-    if (action === 'search') setIsSearching(false);
-    if (action === 'refresh') setIsRefreshing(false);
-  }
-}, [inputKeywords, sortBy, timeFilter, resultLimit, restrictSr, subreddit, includeFacets, type, user?.id]);
-
+  }, [sortBy, timeFilter, resultLimit, restrictSr, subreddit, includeFacets, type, user?.id]);
+  
+  
 
   usePolling(fetchResults, 86400000); // Poll every 24 hours
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    fetchResults('search');
+  
+    // Prepare the keywords
+    const keywords = inputKeywords.split(',').map(keyword => keyword.trim());
+  
+    // If "Phrase Matching" is checked, wrap the keywords in double quotes
+    const finalKeywords = isPhraseMatching ? [`"${keywords.join(' ')}"`] : keywords;
+  
+    // Call the fetchResults function with the modified keywords
+    fetchResults('search', finalKeywords);
   };
+  
+
 
   const handleRefresh = async () => {
     if (isRefreshing) return; // Prevent multiple refreshes
@@ -191,17 +203,36 @@ function KeywordForm() {
                 />
                 {!isSignedIn && <span className="absolute inset-y-0 right-4 flex items-center text-gray-400" title="This feature is only available to signed-in users.">🔒</span>}
               </div>
+              
+              <div className="flex space-x-4">
               <label className="flex items-center space-x-2">
-                <motion.input
-                  whileFocus={{ scale: 1.02 }}
-                  type="checkbox"
-                  checked={restrictSr}
-                  onChange={(e) => setRestrictSr(e.target.checked)}
-                  disabled={!isSignedIn}
-                  className={`h-5 w-5 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}
-                />
-                <span className={`text-gray-200 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}>Restrict to Subreddit</span>
-              </label>
+                  <motion.input
+                    whileFocus={{ scale: 1.02 }}
+                    type="checkbox"
+                    checked={restrictSr}
+                    onChange={(e) => setRestrictSr(e.target.checked)}
+                    disabled={!isSignedIn}
+                    className={`h-5 w-5 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}
+                  />
+                  <span className={`text-gray-200 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}>Restrict to Subreddit</span>
+                </label>
+
+                <label htmlFor="phrase-matching" className="flex items-center space-x-2">
+                  <motion.input
+                    id="phrase-matching"
+                    whileFocus={{ scale: 1.02 }}
+                    type="checkbox"
+                    checked={isPhraseMatching}
+                    onChange={() => setIsPhraseMatching(!isPhraseMatching)}
+                    disabled={!isSignedIn}
+                    className={`h-5 w-5 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}
+                  />
+                  <span className={`text-gray-200 ${!isSignedIn ? 'cursor-not-allowed opacity-50' : ''}`}>Exact Phrase Match</span>
+                </label>
+
+              </div>
+
+
               <div className="flex space-x-4">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -264,64 +295,62 @@ function KeywordForm() {
                     </tr>
                   </thead>
                   <tbody className="bg-gray-800 divide-y divide-gray-700">
-                    {results.length > 0 ? (
-                      results.map((result, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 text-sm text-gray-200">{result.keyword || "N/A"}</td>
-                          <td className="px-6 py-4 text-sm text-gray-200">
-                            <div className="max-w-xs h-12 overflow-hidden text-ellipsis">
-                              {result.title || "N/A"}
-                            </div>
-                          </td>
-                          <td
-  className="px-6 py-4 text-sm text-gray-200 cursor-pointer hover:bg-blue-600 hover:bg-opacity-10 transition-colors duration-300 ease-in"
+  {results.length > 0 ? (
+    results.map((result, index) => (
+      <tr key={index}>
+        <td className="px-6 py-4 text-sm text-gray-200">{result.keyword || "N/A"}</td>
+        <td className="px-6 py-4 text-sm text-gray-200">
+          <div className="max-w-xs h-12 overflow-hidden text-ellipsis">
+            {result.title || "N/A"}
+          </div>
+        </td>
+        <td
+          className="px-6 py-4 text-sm text-gray-200 cursor-pointer hover:bg-blue-600 hover:bg-opacity-10 transition-colors duration-300 ease-in"
+          onClick={() =>
+            handleTextClick({
+              title: result.title,
+              author: result.author,
+              url: result.url,
+              selftext: result.selftext,
+              subreddit: result.subreddit,
+            })
+          }
+        >
+          <div className="max-w-xs h-20 overflow-hidden text-ellipsis">
+            {result.selftext || "N/A"}
+          </div>
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-200">
+          {result.author || "N/A"}
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-200">
+          {result.subreddit || "N/A"}
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-200">
+          {result.url ? (
+            <a
+              href={result.url}
+              className="text-blue-400 hover:underline flex items-center"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLinkIcon className="w-5 h-5" />
+            </a>
+          ) : (
+            "N/A"
+          )}
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="6" className="px-6 py-4 text-sm text-gray-200 text-center">
+        No results found
+      </td>
+    </tr>
+  )}
+</tbody>
 
-  onClick={() =>
-    handleTextClick({
-      title: result.title,
-      author: result.author,
-      url: result.url,
-      selftext: result.selftext,
-      subreddit: result.subreddit,
-    })
-  }
->
-  <div className="max-w-xs h-20 overflow-hidden text-ellipsis">
-    {result.selftext || "N/A"}
-  </div>
-</td>
-
-                          <td className="px-6 py-4 text-sm text-gray-200">
-                            {result.author || "N/A"}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-200">
-                            {result.subreddit || "N/A"}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-200">
-                            {result.url ? (
-                             <a
-                             href={result.url}
-                             className="text-blue-400 hover:underline flex items-center"
-                             target="_blank"
-                             rel="noopener noreferrer"
-                           >
-                             <ExternalLinkIcon className="w-5 h-5" />
-                            
-                           </a>
-                            ) : (
-                              "N/A"
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="px-6 py-4 text-sm text-gray-200 text-center">
-                          No results found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
                 </table>
               </div>
             </div>

@@ -35,12 +35,14 @@ async function getAccessToken() {
 // Function to fetch Reddit posts
 async function fetchRedditPosts({ keywords, resultLimit, sortBy, timeFilter, restrictSr, subreddit, includeFacets, type, after }) {
   const accessToken = await getAccessToken();
+
+  // Join keywords into a single query string
   const query = keywords.join(' ');
 
   const url = new URL(`https://oauth.reddit.com/r/${subreddit || 'all'}/search.json`);
 
   const params = {
-    q: query,
+    q: query,  // Use the query string generated from the keywords
     sort: sortBy || 'new',
     t: timeFilter || 'all',
     limit: resultLimit ? parseInt(resultLimit, 10) : 10,
@@ -92,7 +94,7 @@ export async function POST(request) {
     let data = {};
     if (keywords.length > 0) {
       data = await fetchRedditPosts({
-        keywords,
+        keywords,  // Pass keywords as received from the client-side
         resultLimit: resultLimit || 10,
         sortBy,
         timeFilter,
