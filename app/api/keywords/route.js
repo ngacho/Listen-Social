@@ -1,8 +1,6 @@
 import fetch from 'node-fetch';
 import { getAuth } from '@clerk/nextjs/server';
-import { clerkClient } from '@clerk/nextjs/server';
 import clientPromise from '../../lib/mongodb';
-import supr_client from '../../lib/suprsendClient';
 
 // Function to get Reddit access token
 async function getAccessToken() {

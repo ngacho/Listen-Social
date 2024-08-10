@@ -111,24 +111,26 @@ function KeywordForm() {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-800 to-gray-900 transition-colors duration-300 ease-in">
       <div className="flex flex-1 transition-all duration-300 ease-in">
         <div className="w-full lg:w-1/3 p-6 flex justify-center items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gray-900 p-8 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-md"
-          >
-            <h1 className="text-4xl font-extrabold mb-6 text-gray-100 text-center">
-              Keyword Search <span className="text-blue-400">(Reddit)</span>
-            </h1>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                type="text"
-                placeholder="Enter keywords separated by commas"
-                value={inputKeywords}
-                onChange={(e) => setInputKeywords(e.target.value)}
-                required
-                className="border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300 ease-in"
-              />
+        <motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  whileHover={{ scale: 1.005, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.2)" }}
+  whileFocus={{ scale: 1.005, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.2)" }}
+  className="bg-gray-900 p-8 rounded-3xl shadow-lg hover:shadow-xl border border-gray-700 w-full max-w-md transition-all duration-300 ease-in-out"
+>
+  <h1 className="text-4xl font-extrabold mb-6 text-gray-100 text-center">
+    Keyword Search <span className="text-blue-400">(Reddit)</span>
+  </h1>
+  <form onSubmit={handleSubmit} className="space-y-6">
+    <motion.input
+      whileFocus={{ scale: 1.02, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.6)" }}
+      type="text"
+      placeholder="Enter keywords separated by commas"
+      value={inputKeywords}
+      onChange={(e) => setInputKeywords(e.target.value)}
+      required
+      className="border border-gray-600 bg-gray-700 p-4 rounded-lg w-full text-gray-200 placeholder-gray-400 focus:outline-none  transition-colors duration-300 ease-in"
+    />
               <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4">
                 <div className="relative flex-1">
                   <motion.select
@@ -240,7 +242,13 @@ function KeywordForm() {
         </div>
 
         <div className="w-full lg:w-2/3 p-6 flex flex-col">
-          <div className="bg-gray-880 p-8 rounded-2xl shadow-lg border border-gray-700 flex-1">
+        <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ scale: 1.002, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.2)" }}
+        whileFocus={{ scale: 1.002, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.2)" }}
+        className="bg-gray-890 p-8 rounded-2xl shadow-lg border border-gray-700 flex-1 transition-all duration-300 ease-in-out"
+      >
             <h2 className="text-2xl font-bold mb-6 text-gray-200">Search Results</h2>
             <div className="overflow-x-auto">
               <div className="overflow-y-auto max-h-[calc(100vh-12rem)]"> {/* Adjusted max height */}
@@ -266,7 +274,8 @@ function KeywordForm() {
                             </div>
                           </td>
                           <td
-  className="px-6 py-4 text-sm text-gray-200 cursor-pointer hover:bg-gray-700 transition-colors duration-300 ease-in"
+  className="px-6 py-4 text-sm text-gray-200 cursor-pointer hover:bg-blue-600 hover:bg-opacity-10 transition-colors duration-300 ease-in"
+
   onClick={() =>
     handleTextClick({
       title: result.title,
@@ -316,7 +325,7 @@ function KeywordForm() {
                 </table>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
   
