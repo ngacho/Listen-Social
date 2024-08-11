@@ -126,8 +126,8 @@ function KeywordForm() {
         <motion.div
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
-  whileHover={{ scale: 1.005, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.2)" }}
-  whileFocus={{ scale: 1.005, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.2)" }}
+  whileHover={{ scale: 1.005, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.4)" }}
+  whileFocus={{ scale: 1.005, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.4)" }}
   className="bg-gray-900 p-8 rounded-3xl shadow-lg hover:shadow-xl border border-gray-700 w-full max-w-md transition-all duration-300 ease-in-out"
 >
   <h1 className="text-4xl font-extrabold mb-6 text-gray-100 text-center">
@@ -276,8 +276,8 @@ function KeywordForm() {
         <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={{ scale: 1.002, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.2)" }}
-        whileFocus={{ scale: 1.002, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.2)" }}
+        whileHover={{ scale: 1.002, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.3)" }}
+        whileFocus={{ scale: 1.002, boxShadow: "0px 0px 15px rgba(29, 78, 216, 0.3)" }}
         className="bg-gray-890 p-8 rounded-2xl shadow-lg border border-gray-700 flex-1 transition-all duration-300 ease-in-out"
       >
             <h2 className="text-2xl font-bold mb-6 text-gray-200">Search Results</h2>
