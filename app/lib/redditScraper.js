@@ -1,13 +1,10 @@
 const puppeteer = require('puppeteer');
-const path = require('path');
-
-const cacheDirectory = path.join(__dirname, '.cache', 'puppeteer');
 
 async function scrapeRedditComments(keywords) {
     console.log("Starting Reddit Comment Scraper...");
 
     const browser = await puppeteer.launch({
-        headless: true, // Set to false for debugging
+        headless: false, // Set to false for debugging
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
@@ -20,13 +17,13 @@ async function scrapeRedditComments(keywords) {
         for (const keyword of keywords) {
             console.log(`Navigating to Reddit Search URL with Keyword '${keyword}'...`);
             const url = `https://new.reddit.com/search/?q=${keyword}&type=comment&sort=new`;
-            await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+            await page.goto(url, { waitUntil: 'networkidle2', timeout: 50000 });
 
             console.log("Waiting for the body element to be present...");
             await page.waitForSelector('body', { timeout: 60000 });
 
             console.log("Scrolling down to load more comments...");
-            for (let i = 0; i < 2; i++) { // Adjust range as needed
+            for (let i = 0; i < 1; i++) { // Adjust range as needed
                 console.log(`Scrolling Down ${i + 1}/2...`);
                 await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
             }
