@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { getAuth } from '@clerk/nextjs/server';
 import clientPromise from '../../lib/mongodb';
+import { scrapeRedditComments } from '../../lib/redditScraper'; // Make sure the path is correct
 
 // Function to get Reddit access token
 async function getAccessToken() {
@@ -80,7 +81,7 @@ export async function POST(request) {
     const auth = getAuth(request);
     const { userId } = auth;
 
-    const { keywords, sortBy, timeFilter, restrictSr, subreddit, includeFacets, type, resultLimit } = await request.json();
+    const { keywords, sortBy, timeFilter, restrictSr, subreddit, includeFacets, type, resultLimit, checkComments } = await request.json();
 
     if (!Array.isArray(keywords) || keywords.length === 0) {
       return new Response(JSON.stringify({ error: 'Invalid or missing keywords' }), { status: 400 });
@@ -90,7 +91,7 @@ export async function POST(request) {
       return new Response(JSON.stringify({ error: 'You can only search with a maximum of 3 keywords' }), { status: 400 });
     }
 
-    // Only fetch Reddit posts if keywords are present
+    // Fetch Reddit posts if keywords are present
     let data = {};
     if (keywords.length > 0) {
       data = await fetchRedditPosts({
@@ -105,6 +106,12 @@ export async function POST(request) {
       });
     }
 
+    // If checkComments is true, scrape and include comments
+    let commentsData = [];
+    if (checkComments) {
+      commentsData = await scrapeRedditComments(keywords);
+    }
+
     // Save keywords to MongoDB
     const client = await clientPromise;
     const db = client.db('myDatabase');
@@ -116,7 +123,8 @@ export async function POST(request) {
       { upsert: true } // Create the document if it doesn't exist
     );
 
-    return new Response(JSON.stringify({ ...data }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    // Include commentsData in the response
+    return new Response(JSON.stringify({ ...data, comments: commentsData }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Error processing request:', error);
     return new Response(JSON.stringify({ error: 'Error processing request', details: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
