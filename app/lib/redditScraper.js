@@ -1,4 +1,7 @@
 const puppeteer = require('puppeteer');
+const path = require('path');
+
+const cacheDirectory = path.join(__dirname, '.cache', 'puppeteer');
 
 async function scrapeRedditComments(keywords) {
     console.log("Starting Reddit Comment Scraper...");
