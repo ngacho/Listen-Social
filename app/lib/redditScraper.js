@@ -4,7 +4,7 @@ async function scrapeRedditComments(keywords) {
     console.log("Starting Reddit Comment Scraper...");
 
     const browser = await puppeteer.launch({
-        headless: false, // Set to false for debugging
+        headless: true, // Set to false for debugging
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
